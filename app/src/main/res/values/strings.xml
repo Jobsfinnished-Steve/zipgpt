@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ZipGPT</string>
+    <string name="title">ZipGPT</string>
+    <string name="subtitle">사진 원본을 변환하지 않고 그대로 ZIP으로 묶습니다.</string>
+    <string name="select_photos">사진 선택 → ZIP 만들기</string>
+    <string name="idle">대기 중</string>
+</resources>
