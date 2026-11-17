@@ -1,47 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/title"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_marginTop="36dp" />
+    <WebView
+        android:id="@+id/chatWebView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/zipStatusPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/subtitle"
-        android:textSize="16sp"
-        android:gravity="center"
-        android:layout_marginTop="12dp" />
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="#EFFFFFFF"
+        android:visibility="gone">
 
-    <Button
-        android:id="@+id/selectButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/select_photos"
-        android:layout_marginTop="32dp" />
+        <ProgressBar
+            android:id="@+id/zipProgress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp" />
 
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="24dp" />
+        <TextView
+            android:id="@+id/zipStatusText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textColor="#111111" />
 
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/idle"
-        android:textSize="14sp"
-        android:layout_marginTop="20dp" />
+    </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

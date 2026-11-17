@@ -1,54 +1,55 @@
 # ZipGPT
 
-Android helper app for selecting photos and sharing them as a single ZIP without resizing, JPEG recompression, EXIF rewriting, or any other image transformation.
+ZipGPT is an Android ChatGPT WebView wrapper that automatically converts photo attachments into one ZIP before returning the attachment to the ChatGPT web file input.
 
-## What it does
+## Intended flow
 
-1. Select one or more images from Android's document/gallery picker.
-2. For MediaStore-backed images, ZipGPT tries to reopen the canonical media item and requests the original representation with `MediaStore.setRequireOriginal()` when `ACCESS_MEDIA_LOCATION` is granted.
-3. Each selected file is streamed directly into a ZIP entry. ZipGPT never decodes the image.
-4. The ZIP is created in app cache and Android's share sheet opens automatically.
-5. Cached ZIP files older than 24 hours are deleted on the next ZIP creation.
+```
+Open ZipGPT
+→ ChatGPT loads inside the app
+→ tap ChatGPT + / photo attachment
+→ choose one or more normal photos
+→ ZipGPT intercepts the image file chooser
+→ photos are copied byte-for-byte into one ZIP
+→ the ZIP URI is returned to the same ChatGPT WebView upload callback
+→ ChatGPT receives one .zip attachment
+```
 
-## What "no compression" means
+ZipGPT is **not** a standalone compression/share utility.
 
-The source image bytes are not modified. The ZIP stream uses deflate level 0 because JPEG/HEIC files are already compressed and additional ZIP compression mostly wastes CPU. After extraction, each entry contains the exact bytes read from its source URI.
+## Image preservation
 
-## EXIF / GPS
+ZipGPT does not:
 
-ZipGPT does not parse or reconstruct EXIF. It attempts to copy the original media stream so embedded EXIF remains untouched.
+- resize images
+- decode/re-encode JPEG/HEIC
+- rewrite EXIF
+- strip metadata
+- create thumbnails
 
-Android can redact location metadata for some picker/provider URIs. ZipGPT therefore prefers a canonical MediaStore URI and `MediaStore.setRequireOriginal()` when possible. If that path cannot be opened, it falls back to the selected URI and reports the fallback count on screen.
+`ZipBuilder` streams the selected image bytes directly into ZIP entries using deflate level 0.
 
-Permissions used:
+For MediaStore-backed images, ZipGPT tries to use a canonical MediaStore URI and `MediaStore.setRequireOriginal()` when `ACCESS_MEDIA_LOCATION` is available. If Android/provider restrictions prevent that, it falls back to the selected document URI.
 
-- `READ_MEDIA_IMAGES` on Android 13+
-- `READ_EXTERNAL_STORAGE` on Android 12L and below
-- `ACCESS_MEDIA_LOCATION` on Android 10+ for original unredacted photo metadata
-- `READ_MEDIA_VISUAL_USER_SELECTED` declaration for Android 14+ selected-photo access behavior
+## Other file uploads
 
-ZipGPT does **not** request current device location (`ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`).
+The interception is limited to WebView file chooser requests whose accept types indicate images. Normal PDF/TXT/etc file chooser requests are passed through unchanged.
+
+## Web compatibility
+
+ZipGPT intentionally does not maintain a domain allowlist for ChatGPT subresources. HTTPS resources, OpenAI authentication, Cloudflare challenges, and future ChatGPT support domains are allowed to load normally inside the WebView.
+
+## Current experiment
+
+Whether the current ChatGPT web client accepts an `application/zip` URI returned to an image-oriented file input must be confirmed on-device. The Android bridge now performs the requested behavior; if ChatGPT rejects the ZIP because of its input `accept` policy, the next step is to route the generated ZIP through ChatGPT's generic-file attachment input rather than changing the ZIP contents.
 
 ## Build
 
-Open the project in Android Studio, or push it to GitHub. The included GitHub Actions workflow builds a debug APK and uploads it as the `zipgpt-debug-apk` artifact.
+GitHub Actions runs:
 
-Command-line build with Gradle 8.9 + JDK 17:
+- `testDebugUnitTest`
+- `lintDebug`
+- `assembleDebug`
+- uploads `zipgpt-debug-apk`
 
-```bash
-gradle testDebugUnitTest
-gradle lintDebug
-gradle assembleDebug
-```
-
-## Device test
-
-Recommended test on Samsung Galaxy / Android 16:
-
-1. Pick a Samsung Camera JPEG known to contain GPS EXIF.
-2. Create the ZIP.
-3. Confirm the status shows `원본 MediaStore 경로` for the photo when possible.
-4. Upload the ZIP to ChatGPT.
-5. Ask it to inspect the image and read `DateTimeOriginal`, GPS latitude/longitude and altitude from the file inside the ZIP.
-
-If the app reports `선택 URI 폴백`, Android/provider redaction may already have happened before ZipGPT received the stream.
+Recommended test device: Samsung Galaxy / Android 16.
